@@ -4,6 +4,7 @@ import {
   useState,
 } from 'react'
 import Textarea from 'react-textarea-autosize'
+import Button from '@/app/components/base/button'
 import { useTranslation } from 'react-i18next'
 import Recorder from 'js-audio-recorder'
 import type {
@@ -27,6 +28,9 @@ import { useToastContext } from '@/app/components/base/toast'
 import FeatureBar from '@/app/components/base/features/new-feature-panel/feature-bar'
 import type { FileUpload } from '@/app/components/base/features/types'
 import { TransferMethod } from '@/types/app'
+
+import QuickSendMap from './data'
+import { useWorkflowStore } from '@/app/components/workflow/store'
 
 type ChatInputAreaProps = {
   showFeatureBar?: boolean
@@ -81,6 +85,33 @@ const ChatInputArea = ({
   const historyRef = useRef([''])
   const [currentIndex, setCurrentIndex] = useState(-1)
   const isComposingRef = useRef(false)
+
+  // 修改用户传参默认值
+  const workflowStore = useWorkflowStore()
+
+  const handleQuickSend = (type = '') => {
+    if (isResponding) {
+      notify({ type: 'info', message: t('appDebug.errorMessage.waitForResponse') })
+      return
+    }
+
+    const json: any = QuickSendMap[type]
+    if (onSend && json) {
+      const {
+        inputs,
+        setInputs,
+      } = workflowStore.getState()
+
+      setInputs({
+        ...inputs,
+        query_type: type,
+      })
+
+      setTimeout(() => {
+        onSend(json, [])
+      }, 100)
+    }
+  }
   const handleSend = () => {
     if (isResponding) {
       notify({ type: 'info', message: t('appDebug.errorMessage.waitForResponse') })
@@ -167,6 +198,22 @@ const ChatInputArea = ({
 
   return (
     <>
+      <div className={cn(
+        'body-lg-regular w-full resize-none bg-transparent p-2 leading-6 text-text-tertiary outline-none',
+      )}>
+        <Button
+          className={'h-7 text-sm font-normal'}
+          onClick={() => handleQuickSend('events')}
+        >Event</Button>
+        <Button
+          className={'ml-2 h-7 text-sm font-normal'}
+          onClick={() => handleQuickSend('competitors')}
+        >Competitors</Button>
+        <Button
+          className={'ml-2 h-7 text-sm font-normal'}
+          onClick={() => handleQuickSend('pricetrend')}
+        >LYST</Button>
+    </div>
       <div
         className={cn(
           'relative z-10 rounded-xl border border-components-chat-input-border bg-components-panel-bg-blur pb-[9px] shadow-md',
@@ -187,6 +234,7 @@ const ChatInputArea = ({
               >
                 {query}
               </div>
+
               <Textarea
                 ref={ref => textareaRef.current = ref as any}
                 className={cn(
