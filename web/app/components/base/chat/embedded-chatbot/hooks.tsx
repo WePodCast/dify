@@ -228,6 +228,7 @@ export const useEmbeddedChatbot = () => {
       setInitInputs(inputs)
     })()
   }, [])
+
   useEffect(() => {
     const conversationInputs: Record<string, any> = {}
 
@@ -243,6 +244,7 @@ export const useEmbeddedChatbot = () => {
     if (appConversationData?.data && !appConversationDataLoading)
       setOriginConversationList(appConversationData?.data)
   }, [appConversationData, appConversationDataLoading])
+
   const conversationList = useMemo(() => {
     const data = originConversationList.slice()
 
@@ -284,10 +286,13 @@ export const useEmbeddedChatbot = () => {
       return newConversationInputsRef.current || {}
     return appChatListData.data.slice().pop().inputs || {}
   }, [appChatListData, currentConversationId])
+
   const [currentConversationInputs, setCurrentConversationInputs] = useState<Record<string, any>>(currentConversationLatestInputs || {})
+
   useEffect(() => {
-    if (currentConversationItem)
+    if (currentConversationItem) {
       setCurrentConversationInputs(currentConversationLatestInputs || {})
+    }
   }, [currentConversationItem, currentConversationLatestInputs])
 
   const { notify } = useToastContext()

@@ -49,6 +49,9 @@ const ChatWrapper = () => {
     setClearChatList,
     setIsResponding,
   } = useEmbeddedChatbotContext()
+
+  let messageData = '';
+
   const appConfig = useMemo(() => {
     const config = appParams || {}
 
@@ -62,6 +65,7 @@ const ChatWrapper = () => {
       opening_statement: currentConversationId ? currentConversationItem?.introduction : (config as any).opening_statement,
     } as ChatConfig
   }, [appParams, currentConversationItem?.introduction, currentConversationId])
+
   const {
     chatList,
     setTargetMessageId,
@@ -80,6 +84,28 @@ const ChatWrapper = () => {
     clearChatList,
     setClearChatList,
   )
+
+  useEffect(() => {
+    const handler = (e: MessageEvent) => {
+      const obj = e.data;
+      if (obj && obj.event) {
+        const evt = obj.event;
+
+        if (evt === 'AI_CHAT') {
+          const data = obj.data;
+          const key = data.key
+          messageData = data[key];
+        } 
+        (evt === 'AI_CHAT_SET_TYPE') && (messageData = obj.data.query_type);
+      }
+    };
+    window.addEventListener('message', handler, false);
+
+    return () => {
+      window.removeEventListener('message', handler, false);
+    };
+  }, []);
+
   const inputsFormValue = currentConversationId ? currentConversationInputs : newConversationInputsRef?.current
   const inputDisabled = useMemo(() => {
     let hasEmptyInput = ''
@@ -117,15 +143,23 @@ const ChatWrapper = () => {
     if (currentChatInstanceRef.current)
       currentChatInstanceRef.current.handleStop = handleStop
   }, [currentChatInstanceRef, handleStop])
+
   useEffect(() => {
     setIsResponding(respondingState)
   }, [respondingState, setIsResponding])
 
   const doSend: OnSend = useCallback((message, files, isRegenerate = false, parentAnswer: ChatItem | null = null) => {
+    const key = 'query_type';
+    const val = currentConversationInputs[key]
+    const obj = {
+      ...currentConversationInputs,
+      [key]: val ? val : messageData,
+    }
+
     const data: any = {
       query: message,
       files,
-      inputs: currentConversationId ? currentConversationInputs : newConversationInputs,
+      inputs: currentConversationId ? obj : newConversationInputs,
       conversation_id: currentConversationId,
       parent_message_id: (isRegenerate ? parentAnswer?.id : getLastAnswer(chatList)?.id) || null,
     }

@@ -284,8 +284,9 @@ export const useChatWithHistory = (installedAppInfo?: InstalledApp) => {
   }, [appChatListData, currentConversationId])
   const [currentConversationInputs, setCurrentConversationInputs] = useState<Record<string, any>>(currentConversationLatestInputs || {})
   useEffect(() => {
-    if (currentConversationItem)
+    if (currentConversationItem) {
       setCurrentConversationInputs(currentConversationLatestInputs || {})
+    }
   }, [currentConversationItem, currentConversationLatestInputs])
 
   const { notify } = useToastContext()

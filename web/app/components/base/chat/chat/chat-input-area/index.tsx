@@ -2,6 +2,7 @@ import {
   useCallback,
   useRef,
   useState,
+  useEffect
 } from 'react'
 import Textarea from 'react-textarea-autosize'
 import Button from '@/app/components/base/button'
@@ -31,6 +32,10 @@ import { TransferMethod } from '@/types/app'
 
 import QuickSendMap from './data'
 import { useWorkflowStore } from '@/app/components/workflow/store'
+import { useEmbeddedChatbotContext } from '@/app/components/base/chat/embedded-chatbot/context'
+import { useDebugConfigurationContext } from '@/context/debug-configuration'
+import { useEventEmitterContextContext } from '@/context/event-emitter'
+// inputs: (currentConversationId ? currentConversationInputs : newConversationInputs) as any,
 
 type ChatInputAreaProps = {
   showFeatureBar?: boolean
@@ -86,32 +91,86 @@ const ChatInputArea = ({
   const [currentIndex, setCurrentIndex] = useState(-1)
   const isComposingRef = useRef(false)
 
+  const userConfig = useDebugConfigurationContext()
+  const { eventEmitter } = useEventEmitterContextContext()
+
   // 修改用户传参默认值
   const workflowStore = useWorkflowStore()
 
-  const handleQuickSend = (type = '') => {
+  const {
+    currentConversationInputs,
+    setCurrentConversationInputs,
+    newConversationInputsRef,
+    handleNewConversationInputsChange,
+  } = useEmbeddedChatbotContext()
+
+  useEffect(() => {
+    const handler = (e: MessageEvent) => {
+      const obj = e.data;
+      if (obj && obj.event) {
+        const evt = obj.event;
+        
+        console.log('message listening', obj);
+        (evt === 'AI_CHAT') && onMessage(obj.data);
+        (evt === 'AI_CHAT_SET_TYPE') && handleFormChange(obj.data);
+      }
+    };
+    window.addEventListener('message', handler, false);
+
+    return () => {
+      window.removeEventListener('message', handler, false);
+    };
+  }, []);
+
+  const handleFormChange = (obj = {}) => {
+    console.log('设置参数', {
+      ...currentConversationInputs,
+      ...obj,
+    })
+    setCurrentConversationInputs({
+      ...currentConversationInputs,
+      ...obj,
+    });
+    handleNewConversationInputsChange({
+      ...newConversationInputsRef.current,
+      ...obj,
+    });
+  }
+
+  const onMessage = (obj = {}) => {
     if (isResponding) {
       notify({ type: 'info', message: t('appDebug.errorMessage.waitForResponse') })
       return
     }
 
-    const json: any = QuickSendMap[type]
-    if (onSend && json) {
-      const {
-        inputs,
-        setInputs,
-      } = workflowStore.getState()
+    const key = obj.key;
+    handleFormChange({ [key]: obj[key] });
 
+    setTimeout(() =>loopSendMsg(obj[key] || '', obj.json || ''), 100);
+  }
+
+  const loopSendMsg = (type = '', json = '') => {
+    const key = 'query_type';
+
+    if (workflowStore) {
+      const { inputs, setInputs } = workflowStore.getState()
       setInputs({
         ...inputs,
-        query_type: type,
+        [key]: type,
       })
-
-      setTimeout(() => {
-        onSend(json, [])
-      }, 100)
     }
+
+    console.log('发送请求');
+    onSend && setTimeout(() => onSend(json, []), 500)
   }
+
+  const handleQuickSend = (type = '') => {
+    onMessage({
+      query_type: type,
+      json: QuickSendMap[type],
+    })
+  }
+
   const handleSend = () => {
     if (isResponding) {
       notify({ type: 'info', message: t('appDebug.errorMessage.waitForResponse') })
@@ -135,6 +194,7 @@ const ChatInputArea = ({
       }
     }
   }
+
   const handleCompositionStart = () => {
     // e: React.CompositionEvent<HTMLTextAreaElement>
     isComposingRef.current = true
@@ -212,7 +272,7 @@ const ChatInputArea = ({
         <Button
           className={'ml-2 h-7 text-sm font-normal'}
           onClick={() => handleQuickSend('pricetrend')}
-        >LYST</Button>
+        >Trending</Button>
     </div>
       <div
         className={cn(
