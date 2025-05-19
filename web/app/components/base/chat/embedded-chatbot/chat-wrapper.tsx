@@ -93,10 +93,15 @@ const ChatWrapper = () => {
 
         if (evt === 'AI_CHAT') {
           const data = obj.data;
-          const key = data.key
+          const key = data.key;
+
+          console.log(111, data[key]);
           messageData = data[key];
         } 
-        (evt === 'AI_CHAT_SET_TYPE') && (messageData = obj.data.query_type);
+        if (evt === 'AI_CHAT_SET_TYPE') {
+          console.log(222, data[key]);
+          messageData = obj.data.query_type;
+        }
       }
     };
     window.addEventListener('message', handler, false);
@@ -156,6 +161,7 @@ const ChatWrapper = () => {
       [key]: val ? val : messageData,
     }
 
+    console.log(333, obj);
     const data: any = {
       query: message,
       files,

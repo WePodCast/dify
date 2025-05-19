@@ -76,9 +76,12 @@ const Question: FC<QuestionProps> = ({
   }, [switchSibling, item.prevSibling, item.nextSibling])
 
   return (
-    <div className='mb-2 flex justify-end pl-14 last:mb-0'>
-      <div className={cn('group relative mr-4 flex max-w-full items-start', isEditing && 'flex-1')}>
-        <div className={cn('mr-2 gap-1', isEditing ? 'hidden' : 'flex')}>
+    <div className='mb-2 flex justify-end last:mb-0'>
+      <div className={cn('group relative mr-1 flex max-w-full items-start', isEditing && 'flex-1')}>
+
+        <div className={cn('mr-2 gap-1', isEditing ? 'hidden' : 'flex')}
+          style='position: absolute;'
+        >
           <div className="
             absolutegap-0.5 hidden rounded-[10px] border-[0.5px] border-components-actionbar-border
             bg-components-actionbar-bg p-0.5 shadow-md backdrop-blur-sm group-hover:flex
@@ -95,7 +98,7 @@ const Question: FC<QuestionProps> = ({
           </div>
         </div>
         <div
-          className='w-full rounded-2xl bg-[#D1E9FF]/50 px-4 py-3 text-sm text-gray-900'
+          className='w-full rounded-2xl bg-[#D1E9FF]/50 px-1 py-1 text-sm text-gray-900'
           style={theme?.chatBubbleColorStyle ? CssTransform(theme.chatBubbleColorStyle) : {}}
         >
           {
