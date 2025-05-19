@@ -90,8 +90,6 @@ const ChatInputArea = ({
   const historyRef = useRef([''])
   const [currentIndex, setCurrentIndex] = useState(-1)
   const isComposingRef = useRef(false)
-
-  const userConfig = useDebugConfigurationContext()
   const { eventEmitter } = useEventEmitterContextContext()
 
   // 修改用户传参默认值
@@ -155,27 +153,14 @@ const ChatInputArea = ({
 
     const key = obj.key;
     handleFormChange({ [key]: obj[key] });
-
-    setTimeout(() =>loopSendMsg(obj[key] || '', obj.json || ''), 100);
-  }
-
-  const loopSendMsg = (type = '', json = '') => {
-    const key = 'query_type';
-
-    if (workflowStore) {
-      const { inputs, setInputs } = workflowStore.getState()
-      setInputs({
-        ...inputs,
-        [key]: type,
-      })
-    }
-
-    console.log('发送请求');
-    onSend && setTimeout(() => onSend(json, []), 500)
+    onSend && setTimeout(() => onSend(obj.json, []), 800)
   }
 
   const handleQuickSend = (type = '') => {
+    window.localStorage.setItem('AI_CHAT_QUERY_TYPE', type);
+
     onMessage({
+      key: 'query_type',
       query_type: type,
       json: QuickSendMap[type],
     })

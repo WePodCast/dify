@@ -94,12 +94,11 @@ const ChatWrapper = () => {
         if (evt === 'AI_CHAT') {
           const data = obj.data;
           const key = data.key;
-
-          console.log(111, data[key]);
+          window.localStorage.removeItem('AI_CHAT_QUERY_TYPE');
           messageData = data[key];
         } 
         if (evt === 'AI_CHAT_SET_TYPE') {
-          console.log(222, data[key]);
+          window.localStorage.removeItem('AI_CHAT_QUERY_TYPE');
           messageData = obj.data.query_type;
         }
       }
@@ -155,11 +154,14 @@ const ChatWrapper = () => {
 
   const doSend: OnSend = useCallback((message, files, isRegenerate = false, parentAnswer: ChatItem | null = null) => {
     const key = 'query_type';
+    const quickType = window.localStorage.getItem('AI_CHAT_QUERY_TYPE');
     let obj = currentConversationId ? currentConversationInputs : newConversationInputs;
 
-    if (!obj || !obj[key]) {
-      obj[key] = messageData;
-    }
+    // if (!obj || !obj[key]) {
+    //   obj[key] = messageData;
+    // }
+    obj[key] = quickType || messageData;
+    console.log(111, quickType, obj);
 
     const data: any = {
       query: message,
