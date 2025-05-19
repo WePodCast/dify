@@ -155,17 +155,16 @@ const ChatWrapper = () => {
 
   const doSend: OnSend = useCallback((message, files, isRegenerate = false, parentAnswer: ChatItem | null = null) => {
     const key = 'query_type';
-    const val = currentConversationInputs[key]
-    const obj = {
-      ...currentConversationInputs,
-      [key]: val ? val : messageData,
+    let obj = currentConversationId ? currentConversationInputs : newConversationInputs;
+
+    if (!obj || !obj[key]) {
+      obj[key] = messageData;
     }
 
-    console.log(333, obj);
     const data: any = {
       query: message,
       files,
-      inputs: currentConversationId ? obj : newConversationInputs,
+      inputs: obj,
       conversation_id: currentConversationId,
       parent_message_id: (isRegenerate ? parentAnswer?.id : getLastAnswer(chatList)?.id) || null,
     }

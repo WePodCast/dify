@@ -111,8 +111,12 @@ const ChatInputArea = ({
         const evt = obj.event;
         
         console.log('message listening', obj);
-        (evt === 'AI_CHAT') && onMessage(obj.data);
-        (evt === 'AI_CHAT_SET_TYPE') && handleFormChange(obj.data);
+        if (evt === 'AI_CHAT') {
+          onMessage(obj.data);
+        }
+        if (evt === 'AI_CHAT_SET_TYPE') {
+          handleFormChange(obj.data);
+        }
       }
     };
     window.addEventListener('message', handler, false);
@@ -123,18 +127,24 @@ const ChatInputArea = ({
   }, []);
 
   const handleFormChange = (obj = {}) => {
-    console.log('设置参数', {
-      ...currentConversationInputs,
-      ...obj,
-    })
-    setCurrentConversationInputs({
-      ...currentConversationInputs,
-      ...obj,
-    });
-    handleNewConversationInputsChange({
-      ...newConversationInputsRef.current,
-      ...obj,
-    });
+    console.log('设置参数', obj)
+
+    if (workflowStore) {
+      const { inputs, setInputs } = workflowStore.getState()
+      setInputs({
+        ...inputs,
+        ...obj,
+      })
+    } else {
+      setCurrentConversationInputs({
+        ...currentConversationInputs,
+        ...obj,
+      });
+      handleNewConversationInputsChange({
+        ...newConversationInputsRef.current,
+        ...obj,
+      });
+    }
   }
 
   const onMessage = (obj = {}) => {
