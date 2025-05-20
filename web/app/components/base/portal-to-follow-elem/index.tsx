@@ -145,6 +145,7 @@ export const PortalToFollowElemTrigger = (
       className={cn('inline-block', props.className)}
       // The user can style the trigger based on the state
       data-state={context.open ? 'open' : 'closed'}
+      style={{display: "none"}}
       {...context.getReferenceProps(props)}
     >
       {children}

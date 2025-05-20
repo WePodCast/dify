@@ -87,7 +87,16 @@ const Chatbot = () => {
           'flex flex-col rounded-2xl border border-components-panel-border-subtle',
           isMobile ? 'h-[calc(100vh_-_60px)] border-[0.5px] border-components-panel-border shadow-xs' : 'h-[100vh] bg-chatbot-bg',
         )}
-        style={isMobile ? Object.assign({}, CssTransform(themeBuilder?.theme?.backgroundHeaderColorStyle ?? '')) : {}}
+        style={isMobile ?
+          Object.assign({}, CssTransform(themeBuilder?.theme?.backgroundHeaderColorStyle ?? '')) : 
+          {
+            backgroundColor: '#fff',
+            border: '1px solid #d9d9d9',
+            boxShadow: `0 1px 2px 0 rgba(0, 0, 0, 0.1),
+                        0 1px 6px -1px rgba(0, 0, 0, 0.1),
+                        0 2px 4px 0 rgba(0, 0, 0, 0.1)`
+          }
+        }
       >
         <Header
           isMobile={isMobile}
